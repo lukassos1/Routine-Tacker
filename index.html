@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Routine Tracker</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-border: #393836; --color-text: #cdccca; --color-text-muted: #979590; --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-success: #6daa45; --color-warning: #edb336; --color-danger: #d163a7;
+      --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
+      --font-body: 'Satoshi', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: var(--font-body);
+      background: radial-gradient(circle at top, rgba(79,152,163,0.14), transparent 30%), var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+    }
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: var(--space-6);
+      display: grid;
+      gap: var(--space-6);
+    }
+    .hero, .card {
+      background: rgba(28,27,25,0.92);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(8px);
+    }
+    .hero { padding: var(--space-8); }
+    .card { padding: var(--space-6); }
+    h1 { font-size: var(--text-xl); line-height: 1.1; margin-bottom: var(--space-3); }
+    h2 { font-size: var(--text-lg); margin-bottom: var(--space-4); }
+    p, label, input, textarea, button, select { font-size: var(--text-base); }
+    .muted { color: var(--color-text-muted); }
+    .grid { display: grid; gap: var(--space-6); grid-template-columns: 1.1fr 0.9fr; }
+    .stack { display: grid; gap: var(--space-4); }
+    .question { display: grid; gap: var(--space-2); }
+    input, textarea, select {
+      width: 100%;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1rem;
+      outline: none;
+    }
+    textarea { min-height: 96px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: var(--color-primary); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.9rem 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--color-primary); color: #0c1517; }
+    .btn-primary:hover { background: var(--color-primary-hover); color: white; }
+    .btn-secondary { background: transparent; color: var(--color-text); border: 1px solid var(--color-border); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .pill {
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text);
+      cursor: pointer;
+    }
+    .pill.active { background: var(--color-primary); color: #071012; border-color: var(--color-primary); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+    .stat { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: var(--space-4); border: 1px solid rgba(255,255,255,0.08); }
+    .stat .label { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .stat .value { font-size: var(--text-lg); font-weight: 700; margin-top: var(--space-2); }
+    .entry-list { display: grid; gap: var(--space-3); max-height: 460px; overflow: auto; }
+    .entry {
+      padding: var(--space-4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      display: grid;
+      gap: var(--space-2);
+    }
+    .entry-top { display: flex; justify-content: space-between; gap: var(--space-3); align-items: center; }
+    .tag { font-size: var(--text-sm); padding: 0.3rem 0.65rem; border-radius: 999px; }
+    .tag.morning { background: rgba(79,152,163,0.16); color: #95d6df; }
+    .tag.evening { background: rgba(237,179,54,0.15); color: #ffd474; }
+    .analysis {
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(79,152,163,0.10), rgba(79,152,163,0.04));
+      border: 1px solid rgba(79,152,163,0.22);
+    }
+    ul { padding-left: 1.1rem; }
+    li { margin-bottom: 0.4rem; }
+    .footer-note { font-size: var(--text-sm); color: var(--color-text-muted); }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .app { padding: var(--space-4); }
+      .hero, .card { padding: var(--space-5); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <h1>Routine Tracker</h1>
+      <p class="muted">Morgens Fokus setzen. Abends ehrlich auswerten. Das Tool erkennt Muster und gibt dir konkrete Hebel statt Wohlfühl-Gelaber.</p>
+    </section>
+
+    <section class="grid">
+      <div class="stack">
+        <article class="card">
+          <h2>Check-in</h2>
+          <div class="stack">
+            <div class="question">
+              <label for="entryType">Modus</label>
+              <select id="entryType">
+                <option value="morning">Morgen</option>
+                <option value="evening">Abend</option>
+              </select>
+            </div>
+            <div id="dynamicQuestions" class="stack"></div>
+            <div class="question" id="wellbeingWrap" style="display:none;">
+              <label>Wohlbefinden heute (1 = mies, 10 = stark)</label>
+              <div class="pill-row" id="wellbeingPills"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-primary" id="saveBtn">Eintrag speichern</button>
+              <button class="btn-secondary" id="resetBtn">Formular leeren</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>KI-Auswertung</h2>
+          <div class="analysis" id="analysisBox">
+            Noch keine Daten. Fang heute an und gib dem System Material.
+          </div>
+        </article>
+      </div>
+
+      <div class="stack">
+        <article class="card">
+          <h2>Scoreboard</h2>
+          <div class="stats">
+            <div class="stat">
+              <div class="label">Einträge gesamt</div>
+              <div class="value" id="totalEntries">0</div>
+            </div>
+            <div class="stat">
+              <div class="label">Abend-Ø Wohlbefinden</div>
+              <div class="value" id="avgWellbeing">-</div>
+            </div>
+            <div class="stat">
+              <div class="label">Stärkster Hebel</div>
+              <div class="value" id="bestLever">Noch offen</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Verlauf</h2>
+          <div class="entry-list" id="entryList"></div>
+        </article>
+      </div>
+    </section>
+
+    <p class="footer-note">Die Daten bleiben lokal in deinem Browser auf diesem Gerät. Keine Cloud, kein Backend, kein Schnickschnack.</p>
+  </main>
+
+  <script>
+    const storageKey = 'routine-tracker-v1';
+    const morningQuestions = [
+      { key: 'topPriority', label: 'Was ist heute dein wichtigster Umsatz- oder Wirkungshebel?', type: 'textarea' },
+      { key: 'risk', label: 'Was wird dich heute wahrscheinlich sabotieren?', type: 'textarea' },
+      { key: 'nonNegotiable', label: 'Welche eine Sache ist heute nicht verhandelbar?', type: 'textarea' }
+    ];
+    const eveningQuestions = [
+      { key: 'win', label: 'Was war heute dein stärkster Move?', type: 'textarea' },
+      { key: 'loss', label: 'Wo hast du Zeit oder Fokus verschenkt?', type: 'textarea' },
+      { key: 'energy', label: 'Was hat dir heute Energie gegeben oder gezogen?', type: 'textarea' },
+      { key: 'lesson', label: 'Was ist die klare Lehre für morgen?', type: 'textarea' },
+      { key: 'nextMove', label: 'Was ist morgen dein erster harter Schritt?', type: 'textarea' }
+    ];
+
+    let selectedWellbeing = null;
+
+    function getEntries() {
+      try { return JSON.parse(localStorage.getItem(storageKey)) || []; } catch { return []; }
+    }
+    function saveEntries(entries) {
+      localStorage.setItem(storageKey, JSON.stringify(entries));
+    }
+    function formatDate(ts) {
+      return new Date(ts).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+    }
+
+    function renderQuestions() {
+      const type = document.getElementById('entryType').value;
+      const wrap = document.getElementById('dynamicQuestions');
+      const wellbeingWrap = document.getElementById('wellbeingWrap');
+      const questions = type === 'morning' ? morningQuestions : eveningQuestions;
+      wrap.innerHTML = questions.map(q => `
+        <div class="question">
+          <label for="${q.key}">${q.label}</label>
+          <textarea id="${q.key}" data-key="${q.key}"></textarea>
+        </div>
+      `).join('');
+      wellbeingWrap.style.display = type === 'evening' ? 'grid' : 'none';
+      if (type !== 'evening') selectedWellbeing = null;
+      renderWellbeing();
+    }
+
+    function renderWellbeing() {
+      const pills = document.getElementById('wellbeingPills');
+      pills.innerHTML = Array.from({length: 10}, (_, i) => i + 1).map(n => `
+        <button class="pill ${selectedWellbeing === n ? 'active' : ''}" data-value="${n}" type="button">${n}</button>
+      `).join('');
+      pills.querySelectorAll('.pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedWellbeing = Number(btn.dataset.value);
+          renderWellbeing();
+        });
+      });
+    }
+
+    function computeAnalysis(entries) {
+      if (!entries.length) {
+        return {
+          text: 'Noch keine Daten. Fang heute an und gib dem System Material.',
+          bestLever: 'Noch offen',
+          avgWellbeing: '-'
+        };
+      }
+
+      const eveningEntries = entries.filter(e => e.type === 'evening' && typeof e.wellbeing === 'number');
+      const avgWellbeing = eveningEntries.length
+        ? (eveningEntries.reduce((sum, e) => sum + e.wellbeing, 0) / eveningEntries.length).toFixed(1)
+        : '-';
+
+      const keywordMap = {
+        Schlaf: ['schlaf', 'müde', 'ausgeruht'],
+        Fokus: ['fokus', 'ablenkung', 'konzent', 'handy'],
+        Akquise: ['akquise', 'anruf', 'call', 'linkedin', 'termin'],
+        Training: ['sport', 'training', 'gym', 'laufen'],
+        Planung: ['plan', 'struktur', 'kalender', 'priorität'],
+        Stress: ['stress', 'druck', 'überfordert']
+      };
+
+      const scores = {};
+      const sourceText = entries.map(e => Object.values(e.answers || {}).join(' ').toLowerCase()).join(' ');
+      Object.entries(keywordMap).forEach(([label, words]) => {
+        scores[label] = words.reduce((acc, word) => acc + (sourceText.match(new RegExp(word, 'g')) || []).length, 0);
+      });
+      const bestLever = Object.entries(scores).sort((a,b) => b[1]-a[1])[0]?.[1] > 0
+        ? Object.entries(scores).sort((a,b) => b[1]-a[1])[0][0]
+        : 'Saubere Tagesplanung';
+
+      const lastThree = entries.slice(-3);
+      const repeatedLosses = lastThree.map(e => (e.answers.loss || e.answers.risk || '')).join(' ').toLowerCase();
+      const hasDistraction = /(handy|ablenkung|verzett|aufschieb|scroll)/.test(repeatedLosses);
+      const hasPlanning = /(kein plan|unklar|chaos|struktur)/.test(repeatedLosses);
+      const hasEnergy = /(müde|wenig energie|erschöpft|schlaf)/.test(repeatedLosses);
+
+      const tips = [];
+      if (hasDistraction) tips.push('Ablenkung ist nicht dein Problem, fehlende Härte in der ersten Stunde ist es. Morgen die ersten 60 Minuten ohne Handy, nur mit klarer Hauptaufgabe.');
+      if (hasPlanning) tips.push('Dein Kopf produziert Reibung, wenn der Tag nicht entschieden ist. Plane heute Nacht schon die erste Umsatzaktion für morgen mit Startzeit.');
+      if (hasEnergy) tips.push('Wenn Energie mehrfach ein Thema ist, ist Disziplin allein zu wenig. Schlaf, Essen und Training sind dann Leistungshebel, keine Lifestyle-Themen.');
+      if (!tips.length) tips.push('Du brauchst mehr Datenpunkte. Bleib sieben Tage sauber dran, dann werden die Muster belastbar.');
+
+      const highDays = eveningEntries.filter(e => e.wellbeing >= 8).map(e => Object.values(e.answers).join(' ').toLowerCase()).join(' ');
+      const leverHints = [];
+      if (/(sport|training|gym|laufen)/.test(highDays)) leverHints.push('Hohe Tage korrelieren bei dir mit Bewegung. Plane Training als Performance-Trigger, nicht als Bonus.');
+      if (/(akquise|call|termin|abschluss)/.test(highDays)) leverHints.push('Gute Tage scheinen mit echter Vorwärtsbewegung im Vertrieb zusammenzuhängen. Frühe Umsatzaktionen stabilisieren dein Wohlbefinden.');
+      if (/(klar|plan|fokus|priorität)/.test(highDays)) leverHints.push('Klarheit scheint dein Nervensystem zu beruhigen. Starte Tage nur mit definierter Hauptaufgabe.');
+
+      const text = `
+        <ul>
+          <li>Durchschnittliches Abend-Wohlbefinden: <strong>${avgWellbeing}</strong></li>
+          <li>Aktuell auffälligster Hebel: <strong>${bestLever}</strong></li>
+          ${tips.map(t => `<li>${t}</li>`).join('')}
+          ${leverHints.map(t => `<li>${t}</li>`).join('')}
+        </ul>
+      `;
+
+      return { text, bestLever, avgWellbeing };
+    }
+
+    function renderEntries() {
+      const entries = getEntries().sort((a,b) => b.createdAt - a.createdAt);
+      const entryList = document.getElementById('entryList');
+      if (!entries.length) {
+        entryList.innerHTML = '<div class="entry"><div class="muted">Noch kein Verlauf. Erster Eintrag jetzt.</div></div>';
+      } else {
+        entryList.innerHTML = entries.map(entry => {
+          const answers = Object.entries(entry.answers || {}).map(([k,v]) => `<div><strong>${labelMap[k] || k}:</strong> ${escapeHtml(v)}</div>`).join('');
+          return `
+            <article class="entry">
+              <div class="entry-top">
+                <span class="tag ${entry.type}">${entry.type === 'morning' ? 'Morgen' : 'Abend'}</span>
+                <span class="muted">${formatDate(entry.createdAt)}</span>
+              </div>
+              ${entry.wellbeing ? `<div><strong>Wohlbefinden:</strong> ${entry.wellbeing}/10</div>` : ''}
+              <div class="stack">${answers}</div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('totalEntries').textContent = entries.length;
+      const analysis = computeAnalysis(entries);
+      document.getElementById('analysisBox').innerHTML = analysis.text;
+      document.getElementById('avgWellbeing').textContent = analysis.avgWellbeing;
+      document.getElementById('bestLever').textContent = analysis.bestLever;
+    }
+
+    function escapeHtml(str='') {
+      return str.replace(/[&<>\"]/g, tag => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[tag] || tag));
+    }
+
+    const labelMap = {
+      topPriority: 'Wichtigster Hebel',
+      risk: 'Sabotage-Risiko',
+      nonNegotiable: 'Nicht verhandelbar',
+      win: 'Stärkster Move',
+      loss: 'Zeit/Fokus verschenkt',
+      energy: 'Energiegeber/-zieher',
+      lesson: 'Lehre',
+      nextMove: 'Erster harter Schritt'
+    };
+
+    function resetForm() {
+      renderQuestions();
+      document.querySelectorAll('textarea').forEach(t => t.value = '');
+    }
+
+    document.getElementById('entryType').addEventListener('change', resetForm);
+    document.getElementById('resetBtn').addEventListener('click', resetForm);
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      const type = document.getElementById('entryType').value;
+      const questions = type === 'morning' ? morningQuestions : eveningQuestions;
+      const answers = {};
+      let valid = true;
+      questions.forEach(q => {
+        const value = document.getElementById(q.key).value.trim();
+        answers[q.key] = value;
+        if (!value) valid = false;
+      });
+      if (!valid) {
+        alert('Nicht halbherzig. Füll alle Fragen aus.');
+        return;
+      }
+      if (type === 'evening' && !selectedWellbeing) {
+        alert('Bewerte dein Wohlbefinden ehrlich von 1 bis 10.');
+        return;
+      }
+      const entries = getEntries();
+      entries.push({
+        type,
+        answers,
+        wellbeing: type === 'evening' ? selectedWellbeing : null,
+        createdAt: Date.now()
+      });
+      saveEntries(entries);
+      resetForm();
+      renderEntries();
+    });
+
+    renderQuestions();
+    renderEntries();
+  </script>
+</body>
+</html>
